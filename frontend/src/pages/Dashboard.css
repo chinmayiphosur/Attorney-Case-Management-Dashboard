@@ -5,6 +5,29 @@
     --primary-yellow: #f59e0b;
     --primary-green: #10b981;
     --primary-red: #ef4444;
+    --border: #e2e8f0;
+    --text-muted: #64748b;
+    --accent: #3b82f6;
+}
+
+.text-btn {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: var(--primary-blue);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.text-btn:hover {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .dashboard-container {
