@@ -1,0 +1,187 @@
+.calendar-page {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.title-icon {
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.header-title h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 4px;
+}
+
+.header-title p {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.calendar-legend {
+    display: flex;
+    gap: 20px;
+    background: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.urgent {
+    background-color: #ef4444;
+}
+
+.dot.high {
+    background-color: #f97316;
+}
+
+.dot.medium {
+    background-color: #3b82f6;
+}
+
+.dot.low {
+    background-color: #10b981;
+}
+
+.calendar-container {
+    padding: 32px;
+    min-height: 600px;
+}
+
+/* FullCalendar Customization */
+.fc {
+    font-family: 'Inter', sans-serif;
+    --fc-border-color: #f1f5f9;
+    --fc-page-bg-color: #fff;
+    --fc-today-bg-color: #f8fafc;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.fc .fc-button {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: var(--text-main);
+    font-weight: 500;
+    padding: 8px 16px;
+    text-transform: capitalize;
+    box-shadow: none;
+    transition: all 0.2s;
+}
+
+.fc .fc-button:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+    background: var(--primary-dark);
+    color: white;
+    border-color: var(--primary-dark);
+}
+
+.fc .fc-col-header-cell {
+    padding: 12px 0;
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fc .fc-daygrid-day-number {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 10px;
+}
+
+.fc .fc-event {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: none;
+    margin: 2px 4px;
+}
+
+.fc .fc-event-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    gap: 16px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f1f5f9;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
