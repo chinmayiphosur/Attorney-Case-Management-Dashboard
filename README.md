@@ -27,6 +27,9 @@ A professional, industry-ready Case Management System designed specifically for 
 ## Overview
 Managing multiple legal cases, clients, and deadlines can be overwhelming. **Attorney Dashboard** is a comprehensive solution developed to help attorneys organize their practice. It provides a centralized hub for case tracking, client relations, and document management, allowing legal professionals to focus on winning cases rather than administrative overhead.
 
+### Project Objectives
+Students are required to design and develop a dashboard tailored for attorneys, enabling them to manage their cases efficiently. The application must support full CRUD (Create, Read, Update, Delete) operations, allowing attorneys to add new cases, view existing case details, update case information, and delete records as needed. The interface should be intuitive, functional, and well-structured.
+
 ---
 
 ## Features
