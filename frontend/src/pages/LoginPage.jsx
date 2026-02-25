@@ -42,7 +42,7 @@ const LoginPage = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="auth-header">
-                    <span className="auth-logo">MEDICODIO</span>
+                    <span className="auth-logo">ATTORNEY DASHBOARD</span>
                     <h2>Welcome Back</h2>
                     <p>Enter your credentials to access the dashboard</p>
                 </div>
@@ -58,7 +58,7 @@ const LoginPage = () => {
                                 type="email"
                                 id="email"
                                 name="email"
-                                placeholder="attorney@medicodio.com"
+                                placeholder="attorney@legalhub.com"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
@@ -94,7 +94,7 @@ const LoginPage = () => {
 
                 <div className="auth-footer">
                     <p>
-                        New to Medicodio?
+                        New to the platform?
                         <Link to="/register" className="auth-link">Register as an Attorney</Link>
                     </p>
                 </div>

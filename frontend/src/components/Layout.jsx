@@ -101,8 +101,8 @@ const Layout = ({ children }) => {
                         <Gavel color="#d97706" size={24} />
                     </div>
                     <div className="logo-text">
-                        <h1>Medicodio</h1>
-                        <span>LEGAL SYSTEM</span>
+                        <h1>Attorney</h1>
+                        <span>DASHBOARD</span>
                     </div>
                 </div>
 

@@ -16,7 +16,7 @@ export const exportCaseToPDF = (caseData) => {
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
         doc.setFont('helvetica', 'bold');
-        doc.text('MEDICODIO', margin, 20);
+        doc.text('ATTORNEY DASHBOARD', margin, 20);
 
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
@@ -127,7 +127,7 @@ export const exportCasesListToPDF = (cases) => {
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
         doc.setFont('helvetica', 'bold');
-        doc.text('MEDICODIO', margin, 20);
+        doc.text('ATTORNEY DASHBOARD', margin, 20);
 
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
@@ -171,7 +171,7 @@ export const exportCasesListToPDF = (cases) => {
             );
         }
 
-        doc.save(`Medicodio_Cases_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        doc.save(`Attorney_Hub_Report_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
         console.error('Error generating Cases List PDF:', error);
         alert('Failed to generate Cases List PDF. Check console.');

@@ -47,7 +47,7 @@ const RegisterPage = () => {
                 transition={{ duration: 0.4 }}
             >
                 <div className="auth-header">
-                    <span className="auth-logo">MEDICODIO</span>
+                    <span className="auth-logo">ATTORNEY DASHBOARD</span>
                     <h2>Attorney Registration</h2>
                     <p>Join our secure case management platform</p>
                 </div>
