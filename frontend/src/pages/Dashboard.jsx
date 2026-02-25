@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Briefcase, Clock, AlertTriangle, Users, Calendar, Scale } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Briefcase, Clock, AlertTriangle, Users, Calendar, Scale, Search, FileText, CheckCircle, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import CaseDetailModal from '../components/CaseDetailModal';
 import './Dashboard.css';
 
@@ -38,6 +38,21 @@ const Dashboard = () => {
 
   const [selectedCase, setSelectedCase] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  // Search States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState({ cases: [], clients: [] });
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+
+  // New Analytics States
+  const [docStatusData, setDocStatusData] = useState([
+    { name: 'Pending', value: 0, color: '#f59e0b' },
+    { name: 'Reviewed', value: 0, color: '#3b82f6' },
+    { name: 'Approved', value: 0, color: '#10b981' }
+  ]);
+  const [casesPerClient, setCasesPerClient] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
   const fetchStats = async () => {
     try {
@@ -104,6 +119,49 @@ const Dashboard = () => {
       }));
       setCaseByType(updatedChart);
 
+      // Aggregate Document Statuses
+      const docCounts = cases.reduce((acc, c) => {
+        (c.documents || []).forEach(doc => {
+          const status = doc.status || 'Pending';
+          acc[status] = (acc[status] || 0) + 1;
+        });
+        return acc;
+      }, {});
+
+      setDocStatusData([
+        { name: 'Pending', value: docCounts['Pending'] || 0, color: '#f59e0b' },
+        { name: 'Reviewed', value: docCounts['Reviewed'] || 0, color: '#3b82f6' },
+        { name: 'Approved', value: docCounts['Approved'] || 0, color: '#10b981' }
+      ]);
+
+      // Cases per Client (Bar Chart)
+      const clientCaseCounts = cases.reduce((acc, c) => {
+        const clientName = c.client?.name || 'Unknown';
+        acc[clientName] = (acc[clientName] || 0) + 1;
+        return acc;
+      }, {});
+
+      const barData = Object.entries(clientCaseCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5); // top 5 clients
+      setCasesPerClient(barData);
+
+      // Tasks Aggregation
+      const allTasks = cases.reduce((acc, c) => {
+        (c.checklists || []).forEach(task => {
+          acc.push({
+            ...task,
+            caseId: c._id,
+            caseTitle: c.title,
+            priority: c.priority,
+            deadline: c.hearingDate // using hearingDate as a proxy for deadline if no task date
+          });
+        });
+        return acc;
+      }, []);
+      setTasks(allTasks.sort((a, b) => a.completed - b.completed).slice(0, 5));
+
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
@@ -112,6 +170,35 @@ const Dashboard = () => {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (searchTerm.trim().length > 1) {
+        try {
+          const { data } = await axios.get(`http://localhost:5000/api/search?q=${searchTerm}`);
+          setSearchResults(data);
+          setShowResults(true);
+        } catch (err) {
+          console.error('Search error:', err);
+        }
+      } else {
+        setSearchResults({ cases: [], clients: [] });
+        setShowResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delaySearch);
+  }, [searchTerm]);
 
   const statCards = [
     { title: 'Total Cases', value: stats.totalCases, icon: <Briefcase className="stat-icon-blue" />, sub: '' },
@@ -138,9 +225,63 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <header className="page-header">
-        <h1>Dashboard</h1>
-        <p>Your case management overview at a glance</p>
+      <header className="dashboard-header-container">
+        <div className="page-header">
+          <h1>Dashboard</h1>
+          <p>Welcome back! Here's what's happening today.</p>
+        </div>
+
+        <div className="dashboard-search" ref={searchRef}>
+          <div className="search-input-wrapper">
+            <Search size={20} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search cases, clients, or ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => searchTerm.length > 1 && setShowResults(true)}
+            />
+          </div>
+
+          {showResults && (searchTerm.length > 1) && (
+            <div className="search-results-dropdown">
+              {searchResults.cases.length === 0 && searchResults.clients.length === 0 ? (
+                <div className="no-results">No matches found</div>
+              ) : (
+                <>
+                  {searchResults.cases.length > 0 && (
+                    <div className="result-group">
+                      <div className="group-label">CASES</div>
+                      {searchResults.cases.map(c => (
+                        <div key={c._id} className="result-item" onClick={() => { navigate('/cases'); setShowResults(false); setSearchTerm(''); }}>
+                          <FileText size={16} />
+                          <div className="item-text">
+                            <span className="item-title">{c.title}</span>
+                            <span className="item-sub">{c.caseNumber}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {searchResults.clients.length > 0 && (
+                    <div className="result-group">
+                      <div className="group-label">CLIENTS</div>
+                      {searchResults.clients.map(c => (
+                        <div key={c._id} className="result-item" onClick={() => { navigate('/clients'); setShowResults(false); setSearchTerm(''); }}>
+                          <Users size={16} />
+                          <div className="item-text">
+                            <span className="item-title">{c.name}</span>
+                            <span className="item-sub">{c.email}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="stats-grid">
@@ -158,104 +299,177 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {upcomingHearings.length > 0 && (
-        <div className="card upcoming-hearings">
-          <div className="card-header">
-            <h2><Calendar size={18} style={{ marginRight: '8px' }} /> Upcoming Hearings</h2>
-          </div>
-          <div className="hearings-grid">
-            {upcomingHearings.map(h => (
-              <div key={h._id} className="hearing-card" onClick={() => showDetail(h)}>
-                <div className="hearing-date">
-                  <span className="day">{new Date(h.hearingDate).getDate()}</span>
-                  <span className="month">{new Date(h.hearingDate).toLocaleString('default', { month: 'short' })}</span>
-                </div>
-                <div className="hearing-info">
-                  <h4>{h.title}</h4>
-                  <p>{h.court}</p>
-                </div>
+      <div className="dashboard-grid">
+        {/* Left Column */}
+        <div className="grid-main-col">
+          {upcomingHearings.length > 0 && (
+            <div className="card upcoming-hearings-section">
+              <div className="card-header">
+                <h2><Calendar size={18} /> Upcoming Hearings</h2>
+                <button className="text-btn" onClick={() => navigate('/calendar')}>View Schedule</button>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+              <div className="hearings-list">
+                {upcomingHearings.map(h => (
+                  <div key={h._id} className="hearing-list-item" onClick={() => showDetail(h)}>
+                    <div className="hearing-brief">
+                      <span className="h-date">{new Date(h.hearingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                      <div className="h-info">
+                        <strong>{h.title}</strong>
+                        <span>{h.court}</span>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-      <div className="content-grid">
-        <div className="card main-card recent-cases-card">
-          <div className="card-header">
-            <h2>Recent Cases</h2>
-            <button className="text-btn" onClick={() => navigate('/cases')}>View all →</button>
+          <div className="card task-analysis-card">
+            <div className="card-header">
+              <h2><CheckCircle size={18} /> Legal Tasks & Deadlines</h2>
+              <button className="text-btn" onClick={() => navigate('/kanban')}>Go to Kanban</button>
+            </div>
+            <div className="task-table-container">
+              <table className="task-table">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Case</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks.map((task, i) => (
+                    <tr key={i}>
+                      <td>{task.task}</td>
+                      <td><span className="table-case-title">{task.caseTitle}</span></td>
+                      <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No date'}</td>
+                      <td>
+                        <div className="progress-mini">
+                          <div
+                            className={`progress-fill ${task.completed ? 'done' : ''}`}
+                            style={{ width: task.completed ? '100%' : '30%' }}
+                          ></div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {tasks.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="empty-row">No active tasks found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="case-list">
-            {recentCases.map((c) => (
-              <div key={c._id} className="case-item clickable" onClick={() => showDetail(c)}>
-                <div className="case-info">
-                  <h3>{c.title}</h3>
-                  <div className="case-meta">
-                    <span>{c.caseNumber}</span>
-                    <span>•</span>
-                    <span>{c.client?.name}</span>
+
+          <div className="card recent-cases-card">
+            <div className="card-header">
+              <h2>Recent Active Cases</h2>
+              <button className="text-btn" onClick={() => navigate('/cases')}>Explore All</button>
+            </div>
+            <div className="case-list-dashboard">
+              {recentCases.map((c) => (
+                <div key={c._id} className="case-entry" onClick={() => showDetail(c)}>
+                  <div className="entry-main">
+                    <h4>{c.title}</h4>
+                    <p>{c.client?.name} • {c.caseNumber}</p>
+                    <div className="entry-progress-container">
+                      <div className="progress-label">
+                        <span>Milestones</span>
+                        <span>{Math.round(((c.checklists?.filter(ck => ck.completed).length || 0) / (c.checklists?.length || 1)) * 100)}%</span>
+                      </div>
+                      <div className="progress-bar-bg">
+                        <div
+                          className="progress-bar-fill"
+                          style={{ width: `${((c.checklists?.filter(ck => ck.completed).length || 0) / (c.checklists?.length || 1)) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`badge ${getStatusClass(c.status)}`}>
+                    {c.status}
                   </div>
                 </div>
-                <div className={`badge ${getStatusClass(c.status)}`}>
-                  {c.status}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="card main-card chart-card">
-          <div className="card-header">
-            <h2>Cases by Type</h2>
+        {/* Right Column (Analytics) */}
+        <div className="grid-side-col">
+          <div className="card analytics-card">
+            <div className="card-header">
+              <h2>Cases per Client</h2>
+            </div>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={casesPerClient} layout="vertical" margin={{ left: 10, right: 30 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" width={80} style={{ fontSize: '12px', fill: '#94a3b8' }} />
+                  <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={caseByType}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {caseByType.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        <div className="card main-card chart-card">
-          <div className="card-header">
-            <h2>Case Resolution</h2>
+          <div className="card analytics-card">
+            <div className="card-header">
+              <h2>Document Status</h2>
+            </div>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={docStatusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {docStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }} />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={resolutionData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {resolutionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-              </PieChart>
-            </ResponsiveContainer>
+
+          <div className="card analytics-card">
+            <div className="card-header">
+              <h2>Case Distribution</h2>
+            </div>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={caseByType}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {caseByType.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }} />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </div>

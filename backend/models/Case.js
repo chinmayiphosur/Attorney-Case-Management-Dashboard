@@ -20,6 +20,7 @@ const CaseSchema = new mongoose.Schema({
     url: { type: String, required: true },
     type: { type: String }, // e.g., application/pdf
     size: { type: Number },
+    status: { type: String, enum: ['Pending', 'Reviewed', 'Approved'], default: 'Pending' },
     version: { type: Number, default: 1 },
     uploadedAt: { type: Date, default: Date.now }
   }],

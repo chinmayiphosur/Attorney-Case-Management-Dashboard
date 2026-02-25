@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Briefcase, Users, LogOut, Gavel, Calendar as CalendarIcon, Search, FileText, Bell, X, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, LogOut, Gavel, Calendar as CalendarIcon, Bell, X, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import './Layout.css';
 
 const Layout = ({ children }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState({});
-    const [searchTerm, setSearchTerm] = useState('');
-    const [results, setResults] = useState({ cases: [], clients: [] });
-    const [showResults, setShowResults] = useState(false);
-    const searchRef = useRef(null);
 
     useEffect(() => {
         try {
@@ -24,35 +20,6 @@ const Layout = ({ children }) => {
 
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setShowResults(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-        const delaySearch = setTimeout(async () => {
-            if (searchTerm.trim().length > 1) {
-                try {
-                    const { data } = await axios.get(`http://localhost:5000/api/search?q=${searchTerm}`);
-                    setResults(data);
-                    setShowResults(true);
-                } catch (err) {
-                    console.error('Search error:', err);
-                }
-            } else {
-                setResults({ cases: [], clients: [] });
-                setShowResults(false);
-            }
-        }, 300);
-
-        return () => clearTimeout(delaySearch);
-    }, [searchTerm]);
 
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -149,58 +116,6 @@ const Layout = ({ children }) => {
                         <span className="user-name">{user.name || 'Attorney'}</span>
                         <span className="user-role">{user.specialization || 'Legal Specialist'}</span>
                     </div>
-                </div>
-
-                <div className="search-container" ref={searchRef}>
-                    <div className="search-input-wrapper">
-                        <Search size={18} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search cases or clients..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onFocus={() => searchTerm.length > 1 && setShowResults(true)}
-                        />
-                    </div>
-
-                    {showResults && (searchTerm.length > 1) && (
-                        <div className="search-results-dropdown">
-                            {results.cases.length === 0 && results.clients.length === 0 ? (
-                                <div className="no-results">No matches found</div>
-                            ) : (
-                                <>
-                                    {results.cases.length > 0 && (
-                                        <div className="result-group">
-                                            <div className="group-label">CASES</div>
-                                            {results.cases.map(c => (
-                                                <div key={c._id} className="result-item" onClick={() => { navigate('/cases'); setShowResults(false); setSearchTerm(''); }}>
-                                                    <FileText size={14} />
-                                                    <div className="item-text">
-                                                        <span className="item-title">{c.title}</span>
-                                                        <span className="item-sub">{c.caseNumber}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {results.clients.length > 0 && (
-                                        <div className="result-group">
-                                            <div className="group-label">CLIENTS</div>
-                                            {results.clients.map(c => (
-                                                <div key={c._id} className="result-item" onClick={() => { navigate('/clients'); setShowResults(false); setSearchTerm(''); }}>
-                                                    <Users size={14} />
-                                                    <div className="item-text">
-                                                        <span className="item-title">{c.name}</span>
-                                                        <span className="item-sub">{c.email}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 <nav className="nav-menu">
