@@ -108,104 +108,90 @@
     overflow-y: auto;
 }
 
-/* Main Dashboard Flow */
-.dashboard-content-flow {
+/* Dashboard Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 8px;
+}
+
+.stat-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+}
+
+.stat-content {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 4px;
 }
 
-.dashboard-main-grid {
+.stat-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.stat-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.stat-icon-container {
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon-blue {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.stat-icon-green {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.stat-icon-red {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.stat-icon-yellow {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: 1.8fr 1fr;
     gap: 24px;
-    align-items: start;
 }
 
-@media (max-width: 600px) {
-    .dashboard-main-grid {
+@media (max-width: 1100px) {
+    .dashboard-grid {
         grid-template-columns: 1fr;
     }
 }
 
-/* Upcoming Hearings Horizontal */
-.upcoming-hearings-horizontal {
-    width: 100%;
-}
-
-.hearings-grid-scroll {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    padding: 10px 4px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(59, 130, 246, 0.2) transparent;
-}
-
-.hearings-grid-scroll::-webkit-scrollbar {
-    height: 6px;
-}
-
-.hearings-grid-scroll::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.2);
-    border-radius: 3px;
-}
-
-.hearing-card-flat {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: white;
-    border: 1px solid var(--border);
-    padding: 16px 20px;
-    border-radius: 12px;
-    min-width: 300px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hearing-card-flat:hover {
-    border-color: var(--primary-blue);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-}
-
-.h-date-badge {
+.grid-main-col,
+.grid-side-col {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 10px;
-    min-width: 55px;
-    border: 1px solid var(--border);
-}
-
-.h-day {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--primary-red);
-    line-height: 1;
-}
-
-.h-month {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #94a3b8;
-    margin-top: 2px;
-}
-
-.h-details strong {
-    display: block;
-    font-size: 15px;
-    margin-bottom: 2px;
-    color: #1e293b;
-}
-
-.h-details p {
-    font-size: 12px;
-    color: #64748b;
+    gap: 24px;
 }
 
 /* Cards Elevation */
@@ -216,10 +202,6 @@
     padding: 24px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s, box-shadow 0.2s;
-    height: 100%;
-    /* Ensure cards in a row have same height */
-    display: flex;
-    flex-direction: column;
 }
 
 .card:hover {
