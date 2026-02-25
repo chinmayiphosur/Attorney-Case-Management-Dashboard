@@ -299,32 +299,31 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="dashboard-grid">
-        {/* Left Column */}
-        <div className="grid-main-col">
-          {upcomingHearings.length > 0 && (
-            <div className="card upcoming-hearings-section">
-              <div className="card-header">
-                <h2><Calendar size={18} /> Upcoming Hearings</h2>
-                <button className="text-btn" onClick={() => navigate('/calendar')}>View Schedule</button>
-              </div>
-              <div className="hearings-list">
-                {upcomingHearings.map(h => (
-                  <div key={h._id} className="hearing-list-item" onClick={() => showDetail(h)}>
-                    <div className="hearing-brief">
-                      <span className="h-date">{new Date(h.hearingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                      <div className="h-info">
-                        <strong>{h.title}</strong>
-                        <span>{h.court}</span>
-                      </div>
-                    </div>
-                    <ChevronRight size={16} />
-                  </div>
-                ))}
-              </div>
+      <div className="dashboard-content-flow">
+        {upcomingHearings.length > 0 && (
+          <div className="card upcoming-hearings-horizontal">
+            <div className="card-header">
+              <h2><Calendar size={18} /> Upcoming Hearings</h2>
+              <button className="text-btn" onClick={() => navigate('/calendar')}>View Schedule</button>
             </div>
-          )}
+            <div className="hearings-grid-scroll">
+              {upcomingHearings.map(h => (
+                <div key={h._id} className="hearing-card-flat" onClick={() => showDetail(h)}>
+                  <div className="h-date-badge">
+                    <span className="h-day">{new Date(h.hearingDate).getDate()}</span>
+                    <span className="h-month">{new Date(h.hearingDate).toLocaleString('default', { month: 'short' })}</span>
+                  </div>
+                  <div className="h-details">
+                    <strong>{h.title}</strong>
+                    <p>{h.court}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
+        <div className="dashboard-main-grid">
           <div className="card task-analysis-card">
             <div className="card-header">
               <h2><CheckCircle size={18} /> Legal Tasks & Deadlines</h2>
@@ -366,6 +365,33 @@ const Dashboard = () => {
             </div>
           </div>
 
+          <div className="card analytics-card">
+            <div className="card-header">
+              <h2>Document Status</h2>
+            </div>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={docStatusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {docStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }} />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           <div className="card recent-cases-card">
             <div className="card-header">
               <h2>Recent Active Cases</h2>
@@ -397,10 +423,7 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Right Column (Analytics) */}
-        <div className="grid-side-col">
           <div className="card analytics-card">
             <div className="card-header">
               <h2>Cases per Client</h2>
@@ -420,13 +443,13 @@ const Dashboard = () => {
 
           <div className="card analytics-card">
             <div className="card-header">
-              <h2>Document Status</h2>
+              <h2>Case Resolution</h2>
             </div>
             <div className="chart-wrapper">
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie
-                    data={docStatusData}
+                    data={resolutionData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -434,7 +457,7 @@ const Dashboard = () => {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {docStatusData.map((entry, index) => (
+                    {resolutionData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
